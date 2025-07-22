@@ -4,14 +4,15 @@ from Tables.aluno import Aluno
 from Tables.emprestimo import emprestimo
 from Tables.livro import Livro
 from Tables.adm import Adm
-from Models.login import Login
+#from Models.login import Login
+from Models.menu_principal import MenuPrincipal
 
 def create_tables():
     Base.metadata.create_all(engine)
 
 def main(page: ft.Page):
     create_tables()
-    Login(page)
+    MenuPrincipal(page)
     page.update()
 
 if __name__ == "__main__":
