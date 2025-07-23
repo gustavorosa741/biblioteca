@@ -2,6 +2,7 @@ from flet import Page, Theme, ThemeMode
 import flet as ft
 from Models.aluno import CadastroAluno, ListaAlunos
 from Models.emprestimo import CadastroEmprestimo, CadastroDevolucao
+from DB.database import session
 
 def menu_clicked(e):
     pass
@@ -15,6 +16,13 @@ class MenuPrincipal:
 
         self.page = page
         self.content_area = ft.Column(expand=True)
+
+        def fechar_app(e):
+            page.clean()
+            page.vertical_alignment = ft.MainAxisAlignment.CENTER
+            page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+            page.add(ft.Text("Aplicação fechada."))
+            session.close()
 
         def abrir_cadastro_aluno(e):
             self.content_area.controls.clear()
@@ -78,7 +86,7 @@ class MenuPrincipal:
                     ft.PopupMenuButton(
                         content=ft.Text("Sair", weight=ft.FontWeight.BOLD),
                         items=[
-                            ft.PopupMenuItem(text="Fechar Aplicação", on_click=lambda e: page.close()),
+                            ft.PopupMenuItem(text="Fechar Aplicação", on_click=lambda e: fechar_app(e)),
                             ft.PopupMenuItem(text="Sair do Sistema", on_click=menu_clicked),
                         ]
                     )
