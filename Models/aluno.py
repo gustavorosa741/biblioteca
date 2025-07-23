@@ -252,7 +252,6 @@ class ListaAlunos:
                 width=700
             )
         )
-    
         self.page.update()
         self.page.open(self.dialog)
 
@@ -261,10 +260,6 @@ class ListaAlunos:
             self.dialog.open = False
             self.page.update()
             self.lista_atualizada()
-
-    def voltar_lista(self):
-        self.page.clean()
-        self.page.add(self.get_container())
 
     def confirmar_exclusao(self, aluno: Aluno):
         def fechar_dialogo(e):
@@ -351,14 +346,12 @@ class ListaAlunos:
 
 class AlterarAluno:
     def __init__(self, page: ft.Page, aluno: Aluno = None):
-          # Adicione o parâmetro aluno
         self.page = page
-        self.aluno = aluno  # Armazene o objeto aluno
+        self.aluno = aluno
         
-        # Campos do formulário
         self.nome = ft.TextField(
             label="Nome do Aluno",
-            value=aluno.nome if aluno else "",  # Pré-preenche se existir aluno
+            value=aluno.nome if aluno else "",
             hint_text="Digite o nome completo",
             prefix_icon=ft.Icons.PERSON,
             width=400
@@ -366,11 +359,11 @@ class AlterarAluno:
 
         self.idade = ft.TextField(
             label="Idade",
-            value=str(aluno.idade) if aluno else "",  # Converta idade para string
+            value=str(aluno.idade) if aluno else "",
             hint_text="Ex: 14",
             prefix_icon=ft.Icons.CALENDAR_MONTH,
             width=400,
-            input_filter=ft.InputFilter(r"\d+", allow=True)  # Só permite números
+            input_filter=ft.InputFilter(r"\d+", allow=True)
         )
 
         self.turma = ft.TextField(
@@ -412,14 +405,13 @@ class AlterarAluno:
         self.botao_alterar.on_click = self.alterar_aluno
 
     def alterar_aluno(self, e: ft.ControlEvent):
-        if not self.aluno:  # Se não foi passado um aluno na criação
+        if not self.aluno:
             self.status_texto.value = "Erro: Nenhum aluno selecionado!"
             self.status_texto.color = ft.Colors.RED
             e.page.update()
             return
 
         try:
-            # Atualiza os dados do aluno existente
             self.aluno.nome = self.nome.value
             self.aluno.idade = int(self.idade.value)
             self.aluno.turma = self.turma.value
@@ -438,7 +430,6 @@ class AlterarAluno:
             self.status_texto.color = ft.Colors.RED
         
         e.page.update()
-
 
     def get_container(self):
         return ft.Container(
