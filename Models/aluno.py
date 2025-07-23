@@ -132,13 +132,13 @@ class ListaAlunos:
             label="Buscar por nome",
             prefix_icon=ft.Icons.SEARCH,
             width=400,
-            on_change=lambda e: self.atualizar_lista()
+            on_change=lambda e: self.lista_atualizada()
         )
 
         self.filtro_turma = ft.Dropdown(
             label="Filtrar por turma",
             width=400,
-            on_change=lambda e: self.atualizar_lista(),
+            on_change=lambda e: self.lista_atualizada(),
             hint_text="Todas as turmas"
         )
 
@@ -163,13 +163,13 @@ class ListaAlunos:
             spacing=20
         )
 
+        self.atualizar_lista()
+
+    def gerar_cartao(self, aluno: Aluno):
         self.alunos = session.query(Aluno).order_by(Aluno.nome).all()
         turmas = sorted({aluno.turma for aluno in self.alunos})
         self.filtro_turma.options = [ft.dropdown.Option(t) for t in turmas]
 
-        self.atualizar_lista()
-
-    def gerar_cartao(self, aluno: Aluno):
         return ft.Card(
             elevation=3,
             content=ft.Container(
@@ -232,9 +232,13 @@ class ListaAlunos:
         self.atualizar_lista()
 
     def atualizar_lista(self):
+        self.alunos = session.query(Aluno).order_by(Aluno.nome).all()
+        turmas = sorted({aluno.turma for aluno in self.alunos})
+        self.filtro_turma.options = [ft.dropdown.Option(t) for t in turmas]
+
         nome_filtro = self.filtro_nome.value.lower() if self.filtro_nome.value else ""
         turma_filtro = self.filtro_turma.value
-
+        
         self.lista_view.controls.clear()
         for aluno in self.alunos:
             if nome_filtro and nome_filtro not in aluno.nome.lower():
@@ -242,7 +246,24 @@ class ListaAlunos:
             if turma_filtro and aluno.turma != turma_filtro:
                 continue
             self.lista_view.controls.append(self.gerar_cartao(aluno))
+    
+    def lista_atualizada(self):
+        self.alunos = session.query(Aluno).order_by(Aluno.nome).all()
+        turmas = sorted({aluno.turma for aluno in self.alunos})
+        self.filtro_turma.options = [ft.dropdown.Option(t) for t in turmas]
 
+        nome_filtro = self.filtro_nome.value.lower() if self.filtro_nome.value else ""
+        turma_filtro = self.filtro_turma.value
+        
+        self.lista_view.controls.clear()
+        for aluno in self.alunos:
+            if nome_filtro and nome_filtro not in aluno.nome.lower():
+                continue
+            if turma_filtro and aluno.turma != turma_filtro:
+                continue
+            self.lista_view.controls.append(self.gerar_cartao(aluno))
+        self.lista_view.update()
+            
     def get_container(self):
         return ft.Container(
             content=ft.Card(
