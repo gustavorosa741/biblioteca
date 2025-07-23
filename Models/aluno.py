@@ -73,9 +73,6 @@ class CadastroAluno:
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
         )
-
-    def idade_int(self):
-        int_idade = int(self.idade.value)
         
     def cadastrar_aluno(self, e: ft.ControlEvent):
         nome = self.nome.value
@@ -84,7 +81,6 @@ class CadastroAluno:
 
         buscar_aluno = session.query(Aluno).filter(Aluno.nome == nome).first()
         
-
         if not nome or not idade or not turma:
             self.status_texto.value = "Preencha todos os campos corretamente!"
             self.status_texto.color = ft.Colors.RED
@@ -215,7 +211,6 @@ class ListaAlunos:
                 ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo_informacoes())
             ]
         )
-        self.dialog.open = True
         self.page.update()
         self.page.open(self.dialog)
 
@@ -278,8 +273,6 @@ class ListaAlunos:
                 )
             ]
         )
-        self.page.dialog = self.dialog
-        self.dialog.open = True
         self.page.update()
         self.page.open(self.dialog)
 
