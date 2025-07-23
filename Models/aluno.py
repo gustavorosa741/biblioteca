@@ -212,14 +212,14 @@ class ListaAlunos:
                 padding=10,
             ),
             actions=[
-                ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo())
+                ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo_informacoes())
             ]
         )
         self.dialog.open = True
         self.page.update()
         self.page.open(self.dialog)
 
-    def fechar_dialogo(self):
+    def fechar_dialogo_informacoes(self):
         self.dialog.open = False
         self.page.update()
         
@@ -227,24 +227,40 @@ class ListaAlunos:
         if hasattr(self, 'dialog'):
             self.dialog.open = False
         
-        # Cria o container de edição com os dados do aluno
         editor = AlterarAluno(page=self.page, aluno=aluno)
         
-        # Atualiza a página com o formulário de edição
-        self.page.clean()
-        self.page.add(editor.get_container())
-        
-        # Adiciona botão de voltar
         btn_voltar = ft.ElevatedButton(
             "Voltar à lista",
             icon=ft.Icons.ARROW_BACK,
-            on_click=lambda e: self.voltar_lista(),
+            on_click=lambda e: self.fechar_dialog_editar(),
             style=ft.ButtonStyle(
                 bgcolor=ft.Colors.BLUE_GREY,
                 padding=20
             )
         )
-        self.page.add(ft.Container(btn_voltar, alignment=ft.alignment.center))
+        
+        self.dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(f"Editando: {aluno.nome}"),
+            content=ft.Column(
+                controls=[
+                    editor.get_container(),
+                    ft.Container(btn_voltar, alignment=ft.alignment.center)
+                ],
+                scroll=ft.ScrollMode.AUTO,
+                height=550,
+                width=700
+            )
+        )
+    
+        self.page.update()
+        self.page.open(self.dialog)
+
+    def fechar_dialog_editar(self):
+        if hasattr(self, 'dialog'):
+            self.dialog.open = False
+            self.page.update()
+            self.lista_atualizada()
 
     def voltar_lista(self):
         self.page.clean()
