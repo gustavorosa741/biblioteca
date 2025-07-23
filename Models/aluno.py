@@ -195,17 +195,34 @@ class ListaAlunos:
         )
 
     def mostrar_detalhes(self, aluno: Aluno):
-        self.dialog.title = ft.Text(f"Detalhes de {aluno.nome}")
-        self.dialog.content = ft.Column([
-            ft.Text(f"ID: {aluno.id}"),
-            ft.Text(f"Nome: {aluno.nome}"),
-            ft.Text(f"Idade: {aluno.idade}"),
-            ft.Text(f"Turma: {aluno.turma}"),
-        ])
-        self.dialog.actions = [ft.TextButton("Fechar", on_click=lambda e: setattr(self.dialog, 'open', False))]
-        self.dialog.actions_alignment = ft.MainAxisAlignment.END
+        self.dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(f"Detalhes de {aluno.nome}"),
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(f"ID: {aluno.id}"),
+                        ft.Text(f"Nome: {aluno.nome}"),
+                        ft.Text(f"Idade: {aluno.idade}"),
+                        ft.Text(f"Turma: {aluno.turma}"),
+                    ],
+                    scroll=ft.ScrollMode.AUTO
+                ),
+                height=150,
+                padding=10,
+            ),
+            actions=[
+                ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo())
+            ]
+        )
         self.dialog.open = True
+        self.page.update()
+        self.page.open(self.dialog)
 
+    def fechar_dialogo(self):
+        self.dialog.open = False
+        self.page.update()
+        
     def editar_aluno(self, aluno: Aluno):
         print(f"Editar aluno: {aluno.id} - {aluno.nome}")
         self.status_texto.value = f"Edição futura: {aluno.nome}"
