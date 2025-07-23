@@ -52,8 +52,8 @@ class CadastroEmprestimo:
             border_radius=10,
             filled=True,
             bgcolor=ft.Colors.BLUE_50,
-            width=400
-        
+            width=400,
+            on_change=formatacao
         )
 
         self.status_texto = ft.Text("", size=18)
@@ -142,7 +142,6 @@ class CadastroEmprestimo:
             session.add(consulta_livro)
             session.commit()
 
-
         self.status_texto.value = "Empréstimo cadastrado com sucesso!"
         self.status_texto.color = ft.Colors.GREEN
         self.status_texto.update()
@@ -166,7 +165,6 @@ class CadastroEmprestimo:
             expand=True,
             bgcolor=ft.Colors.BLUE_100
         )
-
 
 class CadastroDevolucao:
     def __init__(self):
@@ -329,4 +327,5 @@ class CadastroDevolucao:
             expand=True,
             bgcolor=ft.Colors.BLUE_100
         )
-        
+
+

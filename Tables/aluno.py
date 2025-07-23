@@ -8,3 +8,4 @@ class Aluno(Base):
     nome = Column(String(100), nullable=False)
     idade = Column(Integer, nullable=False)
     turma = Column(String(50), nullable=False)
+
