@@ -224,10 +224,31 @@ class ListaAlunos:
         self.page.update()
         
     def editar_aluno(self, aluno: Aluno):
-        print(f"Editar aluno: {aluno.id} - {aluno.nome}")
-        self.status_texto.value = f"Edição futura: {aluno.nome}"
-        self.status_texto.color = ft.Colors.AMBER
-        self.status_texto.update()
+        if hasattr(self, 'dialog'):
+            self.dialog.open = False
+        
+        # Cria o container de edição com os dados do aluno
+        editor = AlterarAluno(page=self.page, aluno=aluno)
+        
+        # Atualiza a página com o formulário de edição
+        self.page.clean()
+        self.page.add(editor.get_container())
+        
+        # Adiciona botão de voltar
+        btn_voltar = ft.ElevatedButton(
+            "Voltar à lista",
+            icon=ft.Icons.ARROW_BACK,
+            on_click=lambda e: self.voltar_lista(),
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.BLUE_GREY,
+                padding=20
+            )
+        )
+        self.page.add(ft.Container(btn_voltar, alignment=ft.alignment.center))
+
+    def voltar_lista(self):
+        self.page.clean()
+        self.page.add(self.get_container())
 
     def confirmar_exclusao(self, aluno: Aluno):
         def fechar_dialogo(e):
@@ -301,6 +322,115 @@ class ListaAlunos:
                     content=self.formulario,
                     padding=40,
                     width=900,
+                    border_radius=20,
+                    bgcolor=ft.Colors.WHITE,
+                ),
+                elevation=10,
+                shape=ft.RoundedRectangleBorder(radius=20),
+            ),
+            alignment=ft.alignment.center,
+            expand=True,
+            bgcolor=ft.Colors.BLUE_100
+        )
+
+class AlterarAluno:
+    def __init__(self, page: ft.Page, aluno: Aluno = None):
+          # Adicione o parâmetro aluno
+        self.page = page
+        self.aluno = aluno  # Armazene o objeto aluno
+        
+        # Campos do formulário
+        self.nome = ft.TextField(
+            label="Nome do Aluno",
+            value=aluno.nome if aluno else "",  # Pré-preenche se existir aluno
+            hint_text="Digite o nome completo",
+            prefix_icon=ft.Icons.PERSON,
+            width=400
+        )
+
+        self.idade = ft.TextField(
+            label="Idade",
+            value=str(aluno.idade) if aluno else "",  # Converta idade para string
+            hint_text="Ex: 14",
+            prefix_icon=ft.Icons.CALENDAR_MONTH,
+            width=400,
+            input_filter=ft.InputFilter(r"\d+", allow=True)  # Só permite números
+        )
+
+        self.turma = ft.TextField(
+            label="Turma",
+            value=aluno.turma if aluno else "",
+            hint_text="Ex: 8ºA",
+            prefix_icon=ft.Icons.GROUP,
+            width=400
+        )
+
+        self.status_texto = ft.Text("", size=18)
+
+        self.botao_alterar = ft.ElevatedButton(
+            text="Alterar",
+            icon=ft.Icons.CHECK_CIRCLE,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.BLUE_700,
+                color=ft.Colors.WHITE,
+                shape=ft.RoundedRectangleBorder(radius=10),
+                padding=20,
+            ),
+            width=400,
+            height=50
+        )
+
+        self.formulario = ft.Column(
+            [
+                ft.Text("Alteração de Aluno", size=32, weight=ft.FontWeight.BOLD),
+                self.nome,
+                self.idade,
+                self.turma,
+                self.botao_alterar,
+                self.status_texto,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+        self.botao_alterar.on_click = self.alterar_aluno
+
+    def alterar_aluno(self, e: ft.ControlEvent):
+        if not self.aluno:  # Se não foi passado um aluno na criação
+            self.status_texto.value = "Erro: Nenhum aluno selecionado!"
+            self.status_texto.color = ft.Colors.RED
+            e.page.update()
+            return
+
+        try:
+            # Atualiza os dados do aluno existente
+            self.aluno.nome = self.nome.value
+            self.aluno.idade = int(self.idade.value)
+            self.aluno.turma = self.turma.value
+            
+            session.commit()
+            
+            self.status_texto.value = "Aluno alterado com sucesso!"
+            self.status_texto.color = ft.Colors.GREEN
+            
+        except ValueError:
+            self.status_texto.value = "Idade deve ser um número válido!"
+            self.status_texto.color = ft.Colors.RED
+        except Exception as e:
+            session.rollback()
+            self.status_texto.value = f"Erro: {str(e)}"
+            self.status_texto.color = ft.Colors.RED
+        
+        e.page.update()
+
+
+    def get_container(self):
+        return ft.Container(
+            content=ft.Card(
+                content=ft.Container(
+                    content=self.formulario,
+                    padding=40,
+                    width=500,
                     border_radius=20,
                     bgcolor=ft.Colors.WHITE,
                 ),
