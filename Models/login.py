@@ -1,7 +1,7 @@
 import flet as ft
 from DB.database import session
 from werkzeug.security import generate_password_hash, check_password_hash
-from Tables.adm import Adm
+from Tables.funcionario import Funcionario
 import time
 
 class Login:
@@ -52,7 +52,7 @@ class Login:
                 return
 
             try:
-                usuario_db = session.query(Adm).filter_by(usuario=usuario).first()
+                usuario_db = session.query(Funcionario).filter_by(usuario=usuario).first()
                 if usuario_db and check_password_hash(usuario_db.senha, senha):
                     from Models.menu_principal import MenuPrincipal
                     page.clean()
@@ -194,7 +194,7 @@ class Login:
                 page.update()
                 return
 
-            verificar_usuario = session.query(Adm).filter_by(usuario=usuario.value).first()
+            verificar_usuario = session.query(Funcionario).filter_by(usuario=usuario.value).first()
             try:
                 if verificar_usuario:
                     aviso.value = "Usuário já existe"
@@ -202,7 +202,7 @@ class Login:
                     page.update()
                     return
 
-                novo_usuario = Adm(usuario=usuario.value, senha=generate_password_hash(senha.value))
+                novo_usuario = Funcionario(usuario=usuario.value, senha=generate_password_hash(senha.value))
                 session.add(novo_usuario)
                 session.commit()
 

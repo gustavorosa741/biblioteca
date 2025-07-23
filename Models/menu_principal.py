@@ -1,6 +1,7 @@
 from flet import Page, Theme, ThemeMode
 import flet as ft
 from Models.aluno import CadastroAluno
+from Models.emprestimo import CadastroEmprestimo, CadastroDevolucao
 
 def menu_clicked(e):
     pass
@@ -26,6 +27,16 @@ class MenuPrincipal:
             self.content_area.controls.append(CadastroLivro().get_container())
             page.update()
 
+        def abrir_cadastro_emprestimo(e):
+            self.content_area.controls.clear()
+            self.content_area.controls.append(CadastroEmprestimo().get_container())
+            page.update()
+
+        def abrir_devolucao_emprestimo(e):
+            self.content_area.controls.clear()
+            self.content_area.controls.append(CadastroDevolucao().get_container())
+            page.update()
+
         def menu_clicked(e):
             # Ação padrão para os demais itens
             self.content_area.controls.clear()
@@ -40,7 +51,8 @@ class MenuPrincipal:
                         items=[
                             ft.PopupMenuItem(text="Novo Aluno", on_click=abrir_cadastro_aluno),
                             ft.PopupMenuItem(text="Novo Livro", on_click=abrir_cadastro_livro),
-                            ft.PopupMenuItem(text="Novo Funcionário", on_click=menu_clicked),
+                            ft.PopupMenuItem(text="Novo Empréstimo", on_click=abrir_cadastro_emprestimo),
+                            ft.PopupMenuItem(text="Nova Devolução", on_click=abrir_devolucao_emprestimo),
                         ]
                     ),
                     ft.PopupMenuButton(

@@ -103,25 +103,27 @@ class CadastroLivro:
         localizacao = self.localizacao.value
         etiqueta = self.etiqueta.value
 
-        buscar_livro = session.query(Livro).filter_by(etiqueta=etiqueta).first()
-
         if not nome or not autor or not genero or not localizacao or not etiqueta:
             self.status_texto.value = "Preencha todos os campos corretamente!"
             self.status_texto.color = ft.Colors.RED
+            self.status_texto.update()
+            return
 
-        elif buscar_livro:
+        if session.query(Livro).filter_by(etiqueta=etiqueta).first():
             self.status_texto.value = "Livro já cadastrada!"
             self.status_texto.color = ft.Colors.RED
+            self.status_texto.update()
             return
         
-        novo_livro = Livro(
-            titulo=nome,
-            autor=autor,
-            genero=genero,
-            disponivel=1,
-            localizacao=localizacao,
-            etiqueta=etiqueta
-        )
+        else:
+            novo_livro = Livro(
+                titulo=nome,
+                autor=autor,
+                genero=genero,
+                disponivel=1,
+                localizacao=localizacao,
+                etiqueta=etiqueta
+            )
         session.add(novo_livro)
         session.commit()
 

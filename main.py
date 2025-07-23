@@ -1,9 +1,9 @@
 import flet as ft
 from DB.database import engine, Base
 from Tables.aluno import Aluno
-from Tables.emprestimo import emprestimo
+from Tables.emprestimo import Emprestimo
 from Tables.livro import Livro
-from Tables.adm import Adm
+from Tables.funcionario import Funcionario
 #from Models.login import Login
 from Models.menu_principal import MenuPrincipal
 
