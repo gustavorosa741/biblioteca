@@ -47,7 +47,7 @@ class MenuPrincipal:
         
         def abrir_lista_alunos(e):
             self.content_area.controls.clear()
-            self.content_area.controls.append(ListaAlunos().get_container())
+            self.content_area.controls.append(ListaAlunos(page).get_container())
             page.update()
 
         def menu_clicked(e):

@@ -125,7 +125,8 @@ class CadastroAluno:
         )
 
 class ListaAlunos:
-    def __init__(self):
+    def __init__(self, page: ft.Page):
+        self.page = page
         self.status_texto = ft.Text("", size=18)
 
         self.filtro_nome = ft.TextField(
@@ -212,14 +213,26 @@ class ListaAlunos:
         self.status_texto.update()
 
     def confirmar_exclusao(self, aluno: Aluno):
-        self.dialog.title = ft.Text("Confirmar exclusão")
-        self.dialog.content = ft.Text(f"Deseja realmente excluir {aluno.nome}?")
-        self.dialog.actions = [
-            ft.TextButton("Cancelar", on_click=lambda e: setattr(self.dialog, 'open', False)),
-            ft.TextButton("Excluir", style=ft.ButtonStyle(color=ft.Colors.RED), on_click=lambda e: self.excluir_aluno(aluno))
-        ]
-        self.dialog.actions_alignment = ft.MainAxisAlignment.CENTER
+        def fechar_dialogo(e):
+            self.dialog.open = False
+            self.page.update()
+
+        self.dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Confirmar exclusão"),
+            content=ft.Text(f"Deseja excluir {aluno.nome} permanentemente?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=fechar_dialogo),
+                ft.TextButton("Excluir", 
+                    style=ft.ButtonStyle(color=ft.Colors.RED),
+                    on_click=lambda e: [self.excluir_aluno(aluno), fechar_dialogo(e)]
+                )
+            ]
+        )
+        self.page.dialog = self.dialog
         self.dialog.open = True
+        self.page.update()
+        self.page.open(self.dialog)
 
     def excluir_aluno(self, aluno: Aluno):
         session.delete(aluno)
