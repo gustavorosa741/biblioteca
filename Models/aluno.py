@@ -124,6 +124,7 @@ class ListaAlunos:
     def __init__(self, page: ft.Page):
         self.page = page
         self.status_texto = ft.Text("", size=18)
+        self.dialog = ft.AlertDialog(modal=True)
 
         self.filtro_nome = ft.TextField(
             label="Buscar por nome",
@@ -145,8 +146,6 @@ class ListaAlunos:
             auto_scroll=False,
             expand=True
         )
-
-        self.dialog = ft.AlertDialog(modal=True)
 
         self.formulario = ft.Column(
             [

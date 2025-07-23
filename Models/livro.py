@@ -150,6 +150,75 @@ class CadastroLivro:
             bgcolor=ft.Colors.BLUE_100
         )
 
-    
+class ListaLivros:
+    def __init__(self, page: ft.Page):
+        self.page = page
+        self.status_texto = ft.Text("", size=18)
+        self.dialog = ft.AlertDialog(modal=True)
 
-        
+        self.filtro_nome = ft.TextField(
+            label="Filtrar por Nome",
+            hint_text="Digite o nome do livro",
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=10,
+            filled=True,
+            bgcolor=ft.Colors.BLUE_50,
+            width=400,
+            on_change=self.filtrar_livros
+        )
+
+        self.filtro_autor = ft.TextField(
+            label="Filtrar por Autor",
+            hint_text="Digite o nome do autor",
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=10,
+            filled=True,
+            bgcolor=ft.Colors.BLUE_50,
+            width=400,
+            on_change=self.filtrar_livros
+        )
+
+        self.filtro_genero = ft.TextField(
+            label="Filtrar por Gênero",
+            hint_text="Digite o gênero do livro",
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=10,
+            filled=True,
+            bgcolor=ft.Colors.BLUE_50,
+            width=400,
+            on_change=self.filtrar_livros
+        )
+
+        self.filtro_etiqueta = ft.TextField(
+            label="Filtrar por Etiqueta",
+            hint_text="Digite a etiqueta do livro",
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=10,
+            filled=True,
+            bgcolor=ft.Colors.BLUE_50,
+            width=400,
+            on_change=self.filtrar_livros
+        )
+
+        self.lista_livros = ft.ListView(
+            expand=True,
+            spacing=5,
+            padding=5,
+            auto_scroll= False
+        )
+
+        self.formulario = ft.Column(
+            [
+                ft.Text("📚 Lista de Livros", size=28, weight=ft.FontWeight.BOLD),
+                ft.Row(self.filtro_nome, self.filtro_autor, self.filtro_genero, self.filtro_etiqueta, alignment=ft.MainAxisAlignment.CENTER),
+                self.lista_livros,
+                self.status_texto,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+
+        self.atualizar_lista()
+
+    def gerar_cartao
