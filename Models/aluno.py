@@ -252,17 +252,28 @@ class ListaAlunos:
         self.page.update()
 
     def confirmar_exclusao(self, aluno: Aluno):
+        from Models.emprestimo import Emprestimo
         try:
-            session.delete(aluno)
-            session.commit()
-            self.status_texto.value = "Aluno excluído com sucesso!"
-            self.status_texto.color = ft.Colors.GREEN
+            verifica_emprestimo = session.query(Emprestimo).filter(aluno.id==Emprestimo.aluno_id).first()
+            if verifica_emprestimo:
+                self.dialog.title = ft.Text("Não foi possivel excluir o aluno:")
+                self.dialog.content = ft.Text(f"{aluno.nome} está com um emprestimo ativo.")
+                self.dialog.actions = [
+                    ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo())
+                ]
+                self.page.open()
+                self.page.update()
+            else:
+                session.delete(aluno)
+                session.commit()
+                self.status_texto.value = "Aluno excluído com sucesso!"
+                self.status_texto.color = ft.Colors.GREEN
         except Exception as e:
             session.rollback()
             self.status_texto.value = f"Erro ao excluir aluno: {str(e)}"
             self.status_texto.color = ft.Colors.RED
         
-        self.page.close(self.dialog)
+        
         self.atualizar_lista()
         self.page.update()
 
@@ -272,10 +283,8 @@ class ListaAlunos:
         query = session.query(Aluno)
 
         if termo_busca:
-            # Primeiro verifica se é um número (para idade)
             try:
                 idade_busca = int(termo_busca)
-                # Usa dois or_() aninhados para 3 condições
                 query = query.filter(
                     or_(
                         or_(
@@ -286,7 +295,6 @@ class ListaAlunos:
                     )
                 )
             except ValueError:
-                # Se não for número, busca apenas em nome e turma
                 query = query.filter(
                     or_(
                         Aluno.nome.ilike(f"%{termo_busca}%"),
@@ -296,13 +304,11 @@ class ListaAlunos:
 
         alunos_filtrados = query.all()
 
-        # Atualiza a tabela de forma mais eficiente
         self.tabela_alunos.rows = [
             self.gerar_linha_tabela(aluno)
             for aluno in alunos_filtrados
         ]
 
-        # Atualiza o status
         self.status_texto.value = (
             "Nenhum aluno encontrado." if not alunos_filtrados 
             else f"{len(alunos_filtrados)} aluno(s) encontrado(s)."
