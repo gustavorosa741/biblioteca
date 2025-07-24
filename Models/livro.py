@@ -1,10 +1,10 @@
 import flet as ft
-from flet import DataColumn, DataCell, DataRow
+from flet import DataColumn, DataCell, DataRow, SearchBar
+from sqlalchemy import or_
 from DB.database import session
 from Tables.livro import Livro
 
 def formatacao(e):
-    #remove espaços e converte para maiúsculas
     e.control.value = e.control.value.upper()
     e.control.update()
 
@@ -157,56 +157,47 @@ class ListaLivros:
         self.status_texto = ft.Text("", size=18)
         self.dialog = ft.AlertDialog(modal=True)
 
-        self.filtro_nome = ft.TextField(
-            label="Nome",
-            hint_text="Digite o nome do livro",
-            prefix_icon=ft.Icons.SEARCH,
-            on_change=self.filtrar_livros
+        self.barra_pesquisa = SearchBar(
+            bar_hint_text="Buscar livros por nome, autor, gênero ou etiqueta",
+            view_hint_text="Digite termos para buscar...",
+            on_change=self.filtrar_livros,
+            on_submit=self.filtrar_livros,
+            width=420,
+            height=40,
         )
 
-        self.filtro_autor = ft.TextField(
-            label="Autor",
-            prefix_icon=ft.Icons.SEARCH,
-            on_change=self.filtrar_livros
-        )
-
-        self.filtro_genero = ft.TextField(
-            label="Gênero",
-            prefix_icon=ft.Icons.SEARCH,
-            on_change=self.filtrar_livros
-        )
-
-        self.filtro_etiqueta = ft.TextField(
-            label="Etiqueta",
-            prefix_icon=ft.Icons.SEARCH,
-            on_change=self.filtrar_livros
-        )
-
-        self.filtro_localizacao = ft.TextField(
-            label="Localização",
-            prefix_icon=ft.Icons.SEARCH,
-            on_change=self.filtrar_livros
-        )
-
-        self.filtro_disponibilidade = ft.Dropdown(
-            label="Disponibilidade",
-            options=[
-                ft.dropdown.Option(text="Disponível"),
-                ft.dropdown.Option(text="Indisponível"),
-                ft.dropdown.Option(text="Todos"),
+        self.disponiveis = None
+        self.filtro_disponiveis = ft.PopupMenuButton(
+            items=[
+                ft.PopupMenuItem(
+                    text="Todos os livros", 
+                    on_click=self.disponivel_todos,
+                    checked=lambda: self.disponiveis is None,
+                ),
+                ft.PopupMenuItem(
+                    text="Disponíveis", 
+                    on_click=self.disponivel_disponivel,
+                    checked=lambda: self.disponiveis == 1,
+                ),
+                ft.PopupMenuItem(
+                    text="Indisponíveis", 
+                    on_click=self.disponiveo_indisponivel,
+                    checked=lambda: self.disponiveis == 0,
+                ),
             ],
-            on_change=self.filtrar_livros, 
+            icon=ft.Icons.FILTER_LIST,
+            tooltip="Filtrar livros",
         )
 
         self.tabela_livros = ft.DataTable(
             columns=[
-                DataColumn(label=ft.Text("ID")),
-                DataColumn(self.filtro_nome),
-                DataColumn(self.filtro_autor),
-                DataColumn(self.filtro_genero),
-                DataColumn(self.filtro_etiqueta),
-                DataColumn(self.filtro_localizacao),
-                DataColumn(self.filtro_disponibilidade),
+                ft.DataColumn(ft.Text("ID")),
+                ft.DataColumn(ft.Text("Nome")),
+                ft.DataColumn(ft.Text("Autor")),
+                ft.DataColumn(ft.Text("Gênero")),
+                ft.DataColumn(ft.Text("Etiqueta")),
+                ft.DataColumn(ft.Text("Localização")),
+                ft.DataColumn(ft.Text("Disponibilidade")),
             ],
             rows=[],
             border=ft.border.all(1, ft.Colors.BLACK),
@@ -214,24 +205,18 @@ class ListaLivros:
             data_row_color=ft.Colors.WHITE,
             heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)
         )
-    
-        self.tabela_buscar_livros = ft.Row(
-            controls=[
-                self.filtro_nome,
-                self.filtro_autor,
-                self.filtro_genero,
-                self.filtro_etiqueta,
-                self.filtro_localizacao,
-                self.filtro_disponibilidade,
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            spacing=10
-        )
 
         self.formulario = ft.Column(
             [
                 ft.Text("📚 Lista de Livros", size=28, weight=ft.FontWeight.BOLD),
-                self.tabela_livros,
+                ft.Row([self.barra_pesquisa, self.filtro_disponiveis], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
+                ft.Container(
+                    content=self.tabela_livros,
+                    border=ft.border.all(1, ft.Colors.GREY_300),
+                    border_radius=10,
+                    padding=10,
+                ),
                 self.status_texto,
             ],
             alignment=ft.MainAxisAlignment.CENTER,
@@ -254,46 +239,47 @@ class ListaLivros:
                 DataCell(ft.Text("Disponível" if livro.disponivel else "Indisponível")),
             ]
         )
+    
+    def disponivel_todos(self, e):
+        self.disponiveis = None
+        self.filtrar_livros(e)
+        self.page.update()
+
+    def disponivel_disponivel(self, e):
+        self.disponiveis = 1
+        self.filtrar_livros(e)
+        self.page.update()
+
+    def disponiveo_indisponivel(self, e):
+        self.disponiveis = 0
+        self.filtrar_livros(e)
+        self.page.update()
 
     def filtrar_livros(self, e):
-        nome = self.filtro_nome.value
-        autor = self.filtro_autor.value
-        genero = self.filtro_genero.value
-        etiqueta = self.filtro_etiqueta.value
-        localizacao = self.filtro_localizacao.value
-        disponibilidade = self.filtro_disponibilidade.value
-
+        termo_busca = self.barra_pesquisa.value.strip().lower() if self.barra_pesquisa.value else ""
+        
         query = session.query(Livro)
 
-        if nome:
-            query = query.filter(Livro.titulo.ilike(f"%{nome}%"))
+        if termo_busca:
+            query = query.filter(
+                or_(
+                    Livro.titulo.ilike(f"%{termo_busca}%"),
+                    Livro.autor.ilike(f"%{termo_busca}%"),
+                    Livro.genero.ilike(f"%{termo_busca}%"),
+                    Livro.etiqueta.ilike(f"%{termo_busca}%"),
+                    Livro.localizacao.ilike(f"%{termo_busca}%"),
+                )
+            )
 
-        if autor:
-            query = query.filter(Livro.autor.ilike(f"%{autor}%"))
-
-        if genero:
-            query = query.filter(Livro.genero.ilike(f"%{genero}%"))
-
-        if etiqueta:
-            query = query.filter(Livro.etiqueta.ilike(f"%{etiqueta}%"))
-
-        if localizacao:
-            query = query.filter(Livro.localizacao.ilike(f"%{localizacao}%"))
-        
-        if disponibilidade == "disponível":
-            query = query.filter(Livro.disponivel == 1)
-
-        elif disponibilidade == "indisponível":
-            query = query.filter(Livro.disponivel == 0)
-
-        else:
-            query = query.filter(Livro.disponivel.in_([0, 1]))
+        if self.disponiveis is not None:
+            query = query.filter(Livro.disponivel == self.disponiveis)
 
         livros_filtrados = query.all()
-        self.tabela_livros.rows.clear()
-
-        for livro in livros_filtrados:
-            self.tabela_livros.rows.append(self.gerar_linha_tabela(livro))
+        
+        self.tabela_livros.rows = [
+            self.gerar_linha_tabela(livro) 
+            for livro in livros_filtrados
+        ]
 
         if not livros_filtrados:
             self.status_texto.value = "Nenhum livro encontrado."
@@ -302,9 +288,11 @@ class ListaLivros:
             self.status_texto.value = f"{len(livros_filtrados)} livro(s) encontrado(s)."
             self.status_texto.color = ft.Colors.GREEN
 
-        self.page.update()
+        if e is not None:
+            self.page.update()
 
     def atualizar_lista(self):
+        self.filtrar_livros(None)
         livros = session.query(Livro).all()
         self.tabela_livros.rows.clear()
 
