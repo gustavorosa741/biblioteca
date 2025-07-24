@@ -50,6 +50,12 @@ class MenuPrincipal:
             self.content_area.controls.append(ListaAlunos(page).get_container())
             page.update()
 
+        def abrir_lista_livros(e):
+            from Models.livro import ListaLivros
+            self.content_area.controls.clear()
+            self.content_area.controls.append(ListaLivros(page).get_container())
+            page.update()
+
         def menu_clicked(e):
             # Ação padrão para os demais itens
             self.content_area.controls.clear()
@@ -72,7 +78,7 @@ class MenuPrincipal:
                         content=ft.Text("Consultar", weight=ft.FontWeight.BOLD),
                         items=[
                             ft.PopupMenuItem(text="Lista de Alunos", on_click=abrir_lista_alunos),
-                            ft.PopupMenuItem(text="Livros Cadastrados", on_click=menu_clicked),
+                            ft.PopupMenuItem(text="Livros Cadastrados", on_click=abrir_lista_livros),
                             ft.PopupMenuItem(text="Funcionários", on_click=menu_clicked),
                         ]
                     ),
