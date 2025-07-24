@@ -257,6 +257,7 @@ class ListaLivros:
                 )
             ]
         )
+    
     def editar_livro(self, e, livro: Livro):
         self.dialog.title = "Editar Livro"
         self.dialog.content = ft.Column(
