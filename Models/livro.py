@@ -173,10 +173,11 @@ class ListaLivros:
             data_row_color=ft.Colors.WHITE,
             heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)
         )
+        
         self.filtro_nome = ft.TextField(
-            label="Nome",
+            label=ft.Text("Nome", size=12),
             hint_text="Digite o nome do livro",
-            prefix_icon=ft.Icons.SEARCH,
+            prefix_icon=ft.Icon(name=ft.Icons.SEARCH, size=10),
             width=150,
             on_change=self.filtrar_livros
         )
@@ -212,17 +213,13 @@ class ListaLivros:
         self.filtro_disponibilidade = ft.Dropdown(
             label="Disponibilidade",
             options=[
-                ft.dropdown.Option("Disponível"),
-                ft.dropdown.Option("Indisponível"),
-                ft.dropdown.Option("Todos"),
-
+                ft.dropdown.Option(text="Disponível"),
+                ft.dropdown.Option(text="Indisponível"),
+                ft.dropdown.Option(text="Todos"),
             ],
             width=150,
             on_change=self.filtrar_livros, 
-
         )
-        
-        
 
         self.tabela_buscar_livros = ft.Row(
             controls=[
@@ -289,8 +286,15 @@ class ListaLivros:
 
         if localizacao:
             query = query.filter(Livro.localizacao.ilike(f"%{localizacao}%"))
-
         
+        if disponibilidade == "disponível":
+            query = query.filter(Livro.disponivel == 1)
+
+        elif disponibilidade == "indisponível":
+            query = query.filter(Livro.disponivel == 0)
+
+        else:
+            query = query.filter(Livro.disponivel.in_([0, 1]))
 
         livros_filtrados = query.all()
         self.tabela_livros.rows.clear()
