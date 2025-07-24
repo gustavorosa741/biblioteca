@@ -157,56 +157,34 @@ class ListaLivros:
         self.status_texto = ft.Text("", size=18)
         self.dialog = ft.AlertDialog(modal=True)
 
-        self.tabela_livros = ft.DataTable(
-            columns=[
-                DataColumn(label=ft.Text("ID")),
-                DataColumn(label=ft.Text("Nome")),
-                DataColumn(label=ft.Text("Autor")),
-                DataColumn(label=ft.Text("Gênero")),
-                DataColumn(label=ft.Text("Etiqueta")),
-                DataColumn(label=ft.Text("Localização")),
-                DataColumn(label=ft.Text("Disponibilidade")),
-            ],
-            rows=[],
-            border=ft.border.all(1, ft.Colors.BLACK),
-            heading_row_color=ft.Colors.BLUE_100,
-            data_row_color=ft.Colors.WHITE,
-            heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)
-        )
-        
         self.filtro_nome = ft.TextField(
             label="Nome",
             hint_text="Digite o nome do livro",
             prefix_icon=ft.Icons.SEARCH,
-            width=150,
             on_change=self.filtrar_livros
         )
 
         self.filtro_autor = ft.TextField(
             label="Autor",
             prefix_icon=ft.Icons.SEARCH,
-            width=150,
             on_change=self.filtrar_livros
         )
 
         self.filtro_genero = ft.TextField(
             label="Gênero",
             prefix_icon=ft.Icons.SEARCH,
-            width=150,
             on_change=self.filtrar_livros
         )
 
         self.filtro_etiqueta = ft.TextField(
             label="Etiqueta",
             prefix_icon=ft.Icons.SEARCH,
-            width=150,
             on_change=self.filtrar_livros
         )
 
         self.filtro_localizacao = ft.TextField(
             label="Localização",
             prefix_icon=ft.Icons.SEARCH,
-            width=150,
             on_change=self.filtrar_livros
         )
 
@@ -217,10 +195,26 @@ class ListaLivros:
                 ft.dropdown.Option(text="Indisponível"),
                 ft.dropdown.Option(text="Todos"),
             ],
-            width=150,
             on_change=self.filtrar_livros, 
         )
 
+        self.tabela_livros = ft.DataTable(
+            columns=[
+                DataColumn(label=ft.Text("ID")),
+                DataColumn(self.filtro_nome),
+                DataColumn(self.filtro_autor),
+                DataColumn(self.filtro_genero),
+                DataColumn(self.filtro_etiqueta),
+                DataColumn(self.filtro_localizacao),
+                DataColumn(self.filtro_disponibilidade),
+            ],
+            rows=[],
+            border=ft.border.all(1, ft.Colors.BLACK),
+            heading_row_color=ft.Colors.BLUE_100,
+            data_row_color=ft.Colors.WHITE,
+            heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)
+        )
+    
         self.tabela_buscar_livros = ft.Row(
             controls=[
                 self.filtro_nome,
@@ -237,7 +231,6 @@ class ListaLivros:
         self.formulario = ft.Column(
             [
                 ft.Text("📚 Lista de Livros", size=28, weight=ft.FontWeight.BOLD),
-                self.tabela_buscar_livros,
                 self.tabela_livros,
                 self.status_texto,
             ],
@@ -263,12 +256,12 @@ class ListaLivros:
         )
 
     def filtrar_livros(self, e):
-        nome = self.filtro_nome.value.lower()
-        autor = self.filtro_autor.value.lower()
-        genero = self.filtro_genero.value.lower()
-        etiqueta = self.filtro_etiqueta.value.lower()
-        localizacao = self.filtro_localizacao.value.lower()
-        disponibilidade = self.filtro_disponibilidade.value.lower()
+        nome = self.filtro_nome.value
+        autor = self.filtro_autor.value
+        genero = self.filtro_genero.value
+        etiqueta = self.filtro_etiqueta.value
+        localizacao = self.filtro_localizacao.value
+        disponibilidade = self.filtro_disponibilidade.value
 
         query = session.query(Livro)
 
