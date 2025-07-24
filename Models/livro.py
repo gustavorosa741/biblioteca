@@ -175,9 +175,9 @@ class ListaLivros:
         )
         
         self.filtro_nome = ft.TextField(
-            label=ft.Text("Nome", size=12),
+            label="Nome",
             hint_text="Digite o nome do livro",
-            prefix_icon=ft.Icon(name=ft.Icons.SEARCH, size=10),
+            prefix_icon=ft.Icons.SEARCH,
             width=150,
             on_change=self.filtrar_livros
         )
