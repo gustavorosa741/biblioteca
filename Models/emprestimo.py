@@ -249,6 +249,7 @@ class CadastroDevolucao:
         data_devolucao = self.data_devolucao.value
         responsavel_devolucao = self.responsavel_devolucao.value
         status = "Devolução Concluída"
+        status_livro = 1
 
         consulta_aluno = session.query(Aluno).filter_by(nome=aluno).first()
         consulta_livro = session.query(Livro).filter_by(etiqueta=etiqueta).first()
@@ -302,6 +303,7 @@ class CadastroDevolucao:
             emprestimo.data_devolucao = data_devolucao
             emprestimo.responsavel_devolucao = consulta_funcionario.id
             emprestimo.status = status
+            consulta_livro.disponivel = status_livro
             session.commit()
 
             self.status_texto.value = "Devolução cadastrada com sucesso!"

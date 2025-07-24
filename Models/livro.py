@@ -198,6 +198,7 @@ class ListaLivros:
                 ft.DataColumn(ft.Text("Etiqueta")),
                 ft.DataColumn(ft.Text("Localização")),
                 ft.DataColumn(ft.Text("Disponibilidade")),
+                ft.DataColumn(ft.Text("Ações")),
             ],
             rows=[],
             border=ft.border.all(1, ft.Colors.BLACK),
@@ -237,8 +238,76 @@ class ListaLivros:
                 DataCell(ft.Text(livro.etiqueta)),
                 DataCell(ft.Text(livro.localizacao)),
                 DataCell(ft.Text("Disponível" if livro.disponivel else "Indisponível")),
+                DataCell(
+                    ft.Row(
+                        [
+                            ft.IconButton(
+                                icon=ft.Icons.EDIT,
+                                tooltip="Editar Livro",
+                                on_click=lambda e, livro=livro: self.editar_livro(e, livro)
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                tooltip="Excluir Livro",
+                                on_click=lambda e, livro=livro: self.excluir_livro(e, livro)
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER
+                    )
+                )
             ]
         )
+    def editar_livro(self, e, livro: Livro):
+        self.dialog.title = "Editar Livro"
+        self.dialog.content = ft.Column(
+            [
+                ft.TextField(label="Nome", value=livro.titulo, on_change=formatacao),
+                ft.TextField(label="Autor", value=livro.autor, on_change=formatacao),
+                ft.TextField(label="Gênero", value=livro.genero, on_change=formatacao),
+                ft.TextField(label="Localização", value=livro.localizacao, on_change=formatacao),
+                ft.TextField(label="Etiqueta", value=livro.etiqueta, on_change=formatacao),
+            ],
+            spacing=10
+        )
+        self.dialog.actions = [
+            ft.TextButton("Cancelar", on_click=lambda e: self.fechar_dialog(e)),
+            ft.TextButton("Salvar", on_click=lambda e: self.confirmar_edicao(livro))
+        ]
+        self.page.open(self.dialog)
+        self.page.update()
+
+    def confirmar_edicao(self, livro: Livro):
+        livro.titulo = self.dialog.content.controls[0].value
+        livro.autor = self.dialog.content.controls[1].value
+        livro.genero = self.dialog.content.controls[2].value
+        livro.localizacao = self.dialog.content.controls[3].value
+        livro.etiqueta = self.dialog.content.controls[4].value
+
+        session.commit()
+        self.page.close(self.dialog)
+        self.atualizar_lista()
+        self.page.update()
+
+    def excluir_livro(self, e, livro: Livro):
+        self.dialog.title = "Excluir Livro"
+        self.dialog.content = ft.Text(f"Você tem certeza que deseja excluir o livro '{livro.titulo}'?")
+        self.dialog.actions = [
+            ft.TextButton("Cancelar", on_click=lambda e: self.fechar_dialog(e)),
+            ft.TextButton("Excluir", on_click=lambda e: self.confirmar_exclusao(livro))
+        ]
+        self.page.update()
+        self.page.open(self.dialog)
+
+    def confirmar_exclusao(self, livro: Livro):
+        session.delete(livro)
+        session.commit()
+        self.page.close(self.dialog)
+        self.atualizar_lista()
+        self.page.update()
+        
+    def fechar_dialog(self, e):
+        self.page.close(self.dialog)
+        self.page.update()
     
     def disponivel_todos(self, e):
         self.disponiveis = None
