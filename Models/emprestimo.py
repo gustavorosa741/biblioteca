@@ -386,19 +386,22 @@ class ListarEmprestimo:
         self.atualizar_lista()
 
     def gerar_linha_tabela(self, emprestimo: Emprestimo):
-        session.query(Aluno).filter(emprestimo.aluno_id == Aluno.id).first()
-        session.query(Livro).filter(emprestimo.livro_id == Livro.id).first()
-        session.query(Funcionario).filter(emprestimo.responsavel== Funcionario.id).first()
-        session.query(Funcionario).filter(emprestimo.responsavel_devolucao== Funcionario.id).first()
+        busca_aluno = session.query(Aluno).filter(emprestimo.aluno_id == Aluno.id).first()
+        busca_livro = session.query(Livro).filter(emprestimo.livro_id == Livro.id).first()
+        responsavel = session.query(Funcionario).filter(emprestimo.responsavel== Funcionario.id).first()
+        responsavel_devolucao = session.query(Funcionario).filter(emprestimo.responsavel_devolucao== Funcionario.id).first()
+
+        
+            
         return ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text(str(emprestimo.id))),
-                ft.DataCell(ft.Text(Aluno.nome)),
-                ft.DataCell(ft.Text(Livro.titulo)),
+                ft.DataCell(ft.Text(busca_aluno.nome)),
+                ft.DataCell(ft.Text(busca_livro.etiqueta)),
                 ft.DataCell(ft.Text(emprestimo.data_emprestimo)),
                 ft.DataCell(ft.Text(emprestimo.data_devolucao)),
-                ft.DataCell(ft.Text(Funcionario.usuario)),
-                ft.DataCell(ft.Text(Funcionario.usuario)),
+                ft.DataCell(ft.Text(responsavel.usuario)),
+                ft.DataCell(ft.Text(responsavel_devolucao.usuario)),
                 ft.DataCell(ft.Text(emprestimo.status)),
             ],
             
