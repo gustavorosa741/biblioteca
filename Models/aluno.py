@@ -254,26 +254,14 @@ class ListaAlunos:
     def confirmar_exclusao(self, aluno: Aluno):
         from Models.emprestimo import Emprestimo
         try:
-            verifica_emprestimo = session.query(Emprestimo).filter(aluno.id==Emprestimo.aluno_id).first()
-            if verifica_emprestimo:
-                self.dialog.title = ft.Text("Não foi possivel excluir o aluno:")
-                self.dialog.content = ft.Text(f"{aluno.nome} está com um emprestimo ativo.")
-                self.dialog.actions = [
-                    ft.TextButton("Fechar", on_click=lambda e: self.fechar_dialogo())
-                ]
-                self.page.open()
-                self.page.update()
-            else:
-                session.delete(aluno)
-                session.commit()
-                self.status_texto.value = "Aluno excluído com sucesso!"
-                self.status_texto.color = ft.Colors.GREEN
+            session.delete(aluno)
+            session.commit()
+            self.fechar_dialogo()
         except Exception as e:
             session.rollback()
             self.status_texto.value = f"Erro ao excluir aluno: {str(e)}"
             self.status_texto.color = ft.Colors.RED
-        
-        
+            
         self.atualizar_lista()
         self.page.update()
 
