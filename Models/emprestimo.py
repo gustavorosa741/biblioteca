@@ -1,3 +1,4 @@
+from operator import or_
 import flet as ft
 from DB.database import session
 from Tables.emprestimo import Emprestimo
@@ -330,4 +331,154 @@ class CadastroDevolucao:
             bgcolor=ft.Colors.BLUE_100
         )
 
+class ListarEmprestimo:
+    def __init__(self, page: ft.Page):
+        self.page = page
+        self.status_texto = ft.Text("", size=18)
+        self.dialog = ft.AlertDialog(modal=True)
 
+        self.barra_pesquisa = ft.SearchBar(
+            bar_hint_text="Pesquisar aluno, livro, data de emprestimo ou devolução ou responsavel",
+            on_change= self.filtrar_emprestimo,
+            on_submit=self.filtrar_emprestimo,
+            width=600,
+            height=50,
+        )
+
+        self.tabela_emprestimo = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("ID")),
+                ft.DataColumn(ft.Text("Aluno")),
+                ft.DataColumn(ft.Text("Livro")),
+                ft.DataColumn(ft.Text("Data Emprestimo")),
+                ft.DataColumn(ft.Text("Data Devolução")),
+                ft.DataColumn(ft.Text("Responsavel Emprestimo")),
+                ft.DataColumn(ft.Text("Responsavel Devolução")),
+                ft.DataColumn(ft.Text("Status")),
+            ],
+            rows=[],
+            border=ft.border.all(1, ft.Colors.BLACK),
+            heading_row_color=ft.Colors.BLUE_100,
+            data_row_color=ft.Colors.WHITE,
+            heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD)
+        )
+
+        self.formulario = ft.Column(
+            [
+                ft.Text("🔄 Lista de Emprestimos", size=28, weight=ft.FontWeight.BOLD),
+                ft.Row([self.barra_pesquisa], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
+                ft.Container(
+                    content=self.tabela_emprestimo,
+                    padding=20,
+                    bgcolor=ft.Colors.WHITE,
+                    border_radius=10,
+                    expand=True
+                ),
+                self.status_texto,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=5,
+            scroll=ft.ScrollMode.AUTO
+        )
+        
+        self.atualizar_lista()
+
+    def gerar_linha_tabela(self, emprestimo: Emprestimo):
+        session.query(Aluno).filter(emprestimo.aluno_id == Aluno.id).first()
+        session.query(Livro).filter(emprestimo.livro_id == Livro.id).first()
+        session.query(Funcionario).filter(emprestimo.responsavel== Funcionario.id).first()
+        session.query(Funcionario).filter(emprestimo.responsavel_devolucao== Funcionario.id).first()
+        return ft.DataRow(
+            cells=[
+                ft.DataCell(ft.Text(str(emprestimo.id))),
+                ft.DataCell(ft.Text(Aluno.nome)),
+                ft.DataCell(ft.Text(Livro.titulo)),
+                ft.DataCell(ft.Text(emprestimo.data_emprestimo)),
+                ft.DataCell(ft.Text(emprestimo.data_devolucao)),
+                ft.DataCell(ft.Text(Funcionario.usuario)),
+                ft.DataCell(ft.Text(Funcionario.usuario)),
+                ft.DataCell(ft.Text(emprestimo.status)),
+            ],
+            
+        )
+    
+    def fechar_dialogo(self):
+        self.dialog.open = False
+        self.page.update()
+
+    def filtrar_emprestimo(self, e):
+        termo_busca = self.barra_pesquisa.value.strip().lower() if self.barra_pesquisa.value else ""
+
+        query = session.query(Emprestimo)
+
+        if termo_busca:
+            id_aluno = int(termo_busca)
+            id_livro = int(termo_busca)
+            id_responsavel = int(termo_busca)
+            id_responsavel_devolucao = int(termo_busca)
+            query = query.filter(
+                or_(
+                    Emprestimo.aluno_id == id_aluno(f"%{termo_busca}%"),
+                    Emprestimo.livro_id == id_livro(f"%{termo_busca}%"),
+                    Emprestimo.data_emprestimo.ilike(f"%{termo_busca}%"),
+                    Emprestimo.data_devolucao.ilike(f"%{termo_busca}%"),
+                    Emprestimo.responsavel == id_responsavel(f"%{termo_busca}%"),
+                    Emprestimo.responsavel_devolucao == id_responsavel_devolucao(f"%{termo_busca}%"),
+                    Emprestimo.status.ilike(f"%{termo_busca}%"),
+                )
+            )
+
+        emprestimo_filtrados = query.all()
+        
+        self.tabela_emprestimo.rows = [
+            self.gerar_linha_tabela(emprestimo) 
+            for emprestimo in emprestimo_filtrados
+        ]
+
+        if not emprestimo_filtrados:
+            self.status_texto.value = "Nenhum emprestimo encontrado."
+            self.status_texto.color = ft.Colors.RED
+        else:
+            self.status_texto.value = f"{len(emprestimo_filtrados)} emprestimo(s) encontrado(s)."
+            self.status_texto.color = ft.Colors.GREEN
+
+        if e is not None:
+            self.page.update()
+
+    def atualizar_lista(self):
+        self.filtrar_emprestimo(None)
+        emprestimos = session.query(Emprestimo).all()
+        self.tabela_emprestimo.rows.clear()
+
+        for emprestimo in emprestimos:
+            self.tabela_emprestimo.rows.append(self.gerar_linha_tabela(emprestimo))
+
+        if not emprestimos:
+            self.status_texto.value = "Nenhum emprestimo cadastrado."
+            self.status_texto.color = ft.Colors.RED
+
+        else:
+            self.status_texto.value = f"{len(emprestimos)} emprestimo(s) cadastrado(s)."
+            self.status_texto.color = ft.Colors.GREEN
+
+        self.page.update()
+            
+    def get_container(self):
+        return ft.Container(
+            content=ft.Card(
+                content=ft.Container(
+                    content=self.formulario,
+                    padding=40,
+                    width=1300,
+                    border_radius=20,
+                    bgcolor=ft.Colors.WHITE,
+                ),
+                elevation=10,
+                shape=ft.RoundedRectangleBorder(radius=20),
+            ),
+            alignment=ft.alignment.center,
+            expand=True,
+            bgcolor=ft.Colors.BLUE_100
+        )

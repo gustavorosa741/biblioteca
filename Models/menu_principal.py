@@ -55,6 +55,12 @@ class MenuPrincipal:
             self.content_area.controls.clear()
             self.content_area.controls.append(ListaLivros(page).get_container())
             page.update()
+            
+        def abrir_lista_emprestimos(e):
+            from Models.emprestimo import ListarEmprestimo
+            self.content_area.controls.clear()
+            self.content_area.controls.append(ListarEmprestimo(page).get_container())
+            page.update()
 
         def menu_clicked(e):
             # Ação padrão para os demais itens
@@ -85,7 +91,7 @@ class MenuPrincipal:
                     ft.PopupMenuButton(
                         content=ft.Text("Relatórios", weight=ft.FontWeight.BOLD),
                         items=[
-                            ft.PopupMenuItem(text="Livros Emprestados", on_click=menu_clicked),
+                            ft.PopupMenuItem(text="Livros Emprestados", on_click=abrir_lista_emprestimos),
                             ft.PopupMenuItem(text="Histórico de Alunos", on_click=menu_clicked),
                         ]
                     ),
