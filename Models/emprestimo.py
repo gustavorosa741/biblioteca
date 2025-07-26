@@ -1,10 +1,13 @@
-from operator import or_
 import flet as ft
 from DB.database import session
 from Tables.emprestimo import Emprestimo
 from Tables.livro import Livro
 from Tables.funcionario import Funcionario
 from Tables.aluno import Aluno
+from sqlalchemy import String, cast, or_
+from sqlalchemy.orm import aliased
+
+
 
 def formatacao(e):
     #remove espaços e converte para maiúsculas
@@ -417,34 +420,41 @@ class ListarEmprestimo:
         query = session.query(Emprestimo)
 
         if termo_busca:
-            id_aluno = int(termo_busca)
-            id_livro = int(termo_busca)
-            id_responsavel = int(termo_busca)
-            id_responsavel_devolucao = int(termo_busca)
-            query = query.filter(
-                or_(
-                    Emprestimo.aluno_id == id_aluno(f"%{termo_busca}%"),
-                    Emprestimo.livro_id == id_livro(f"%{termo_busca}%"),
-                    Emprestimo.data_emprestimo.ilike(f"%{termo_busca}%"),
-                    Emprestimo.data_devolucao.ilike(f"%{termo_busca}%"),
-                    Emprestimo.responsavel == id_responsavel(f"%{termo_busca}%"),
-                    Emprestimo.responsavel_devolucao == id_responsavel_devolucao(f"%{termo_busca}%"),
-                    Emprestimo.status.ilike(f"%{termo_busca}%"),
+            # Aliases para os dois funcionários (responsável e devolução)
+            Responsavel = aliased(Funcionario)
+            ResponsavelDevolucao = aliased(Funcionario)
+
+            query = (
+                query
+                .join(Aluno, Emprestimo.aluno_id == Aluno.id, isouter=True)
+                .join(Livro, Emprestimo.livro_id == Livro.id, isouter=True)
+                .join(Responsavel, Emprestimo.responsavel == Responsavel.id, isouter=True)
+                .join(ResponsavelDevolucao, Emprestimo.responsavel_devolucao == ResponsavelDevolucao.id, isouter=True)
+                .filter(
+                    or_(
+                        Aluno.nome.ilike(f"%{termo_busca}%"),
+                        Livro.etiqueta.ilike(f"%{termo_busca}%"),
+                        Livro.titulo.ilike(f"%{termo_busca}%"),
+                        Responsavel.usuario.ilike(f"%{termo_busca}%"),
+                        ResponsavelDevolucao.usuario.ilike(f"%{termo_busca}%"),
+                        Emprestimo.status.ilike(f"%{termo_busca}%"),
+                        cast(Emprestimo.data_emprestimo, String).ilike(f"%{termo_busca}%"),
+                        cast(Emprestimo.data_devolucao, String).ilike(f"%{termo_busca}%")
+                    )
                 )
             )
 
         emprestimo_filtrados = query.all()
-        
+
         self.tabela_emprestimo.rows = [
-            self.gerar_linha_tabela(emprestimo) 
-            for emprestimo in emprestimo_filtrados
+            self.gerar_linha_tabela(emprestimo) for emprestimo in emprestimo_filtrados
         ]
 
         if not emprestimo_filtrados:
-            self.status_texto.value = "Nenhum emprestimo encontrado."
+            self.status_texto.value = "Nenhum empréstimo encontrado."
             self.status_texto.color = ft.Colors.RED
         else:
-            self.status_texto.value = f"{len(emprestimo_filtrados)} emprestimo(s) encontrado(s)."
+            self.status_texto.value = f"{len(emprestimo_filtrados)} empréstimo(s) encontrado(s)."
             self.status_texto.color = ft.Colors.GREEN
 
         if e is not None:
