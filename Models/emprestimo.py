@@ -396,12 +396,12 @@ class ListarEmprestimo:
         return ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text(str(emprestimo.id))),
-                ft.DataCell(ft.Text(busca_aluno.nome)),
-                ft.DataCell(ft.Text(busca_livro.etiqueta)),
+                ft.DataCell(ft.Text(busca_aluno.nome if busca_aluno else "Aluno Excluido")),
+                ft.DataCell(ft.Text(busca_livro.etiqueta if busca_livro else "Livro Excluido")),
                 ft.DataCell(ft.Text(emprestimo.data_emprestimo)),
                 ft.DataCell(ft.Text(emprestimo.data_devolucao)),
-                ft.DataCell(ft.Text(responsavel.usuario)),
-                ft.DataCell(ft.Text(responsavel_devolucao.usuario)),
+                ft.DataCell(ft.Text(responsavel.usuario if responsavel else "Responsavel Excluido")),
+                ft.DataCell(ft.Text(responsavel_devolucao.usuario if responsavel_devolucao else "Responsavel Excluido")),
                 ft.DataCell(ft.Text(emprestimo.status)),
             ],
             
