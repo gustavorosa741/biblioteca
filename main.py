@@ -16,4 +16,8 @@ def main(page: ft.Page):
     page.update()
 
 if __name__ == "__main__":
-    ft.app(target=main) 
+    #abrir app desktop
+    #ft.app(target=main)
+
+    #abrir app navegador
+    ft.app(target=main, view=None, host="0.0.0.0", port=8080) 
