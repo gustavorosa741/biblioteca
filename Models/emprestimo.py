@@ -422,7 +422,6 @@ class ListarEmprestimo:
         query = session.query(Emprestimo)
 
         if termo_busca:
-            # Aliases para os dois funcionários (responsável e devolução)
             Responsavel = aliased(Funcionario)
             ResponsavelDevolucao = aliased(Funcionario)
 

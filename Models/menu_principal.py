@@ -63,7 +63,6 @@ class MenuPrincipal:
             page.update()
 
         def menu_clicked(e):
-            # Ação padrão para os demais itens
             self.content_area.controls.clear()
             self.content_area.controls.append(ft.Text(f"Clicou em: {e.control.text}"))
             page.update()
@@ -108,7 +107,6 @@ class MenuPrincipal:
             border_radius=5
         )
 
-        # Adiciona os elementos na tela
         page.add(
             ft.Column(
                 [
@@ -121,6 +119,5 @@ class MenuPrincipal:
             )
         )
 
-        # Mensagem inicial
         self.content_area.controls.append(ft.Text("Bem-vindo ao sistema de biblioteca!", size=24))
         page.update()
