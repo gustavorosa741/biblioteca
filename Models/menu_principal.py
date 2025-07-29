@@ -85,21 +85,18 @@ class MenuPrincipal:
                         items=[
                             ft.PopupMenuItem(text="Lista de Alunos", on_click=abrir_lista_alunos),
                             ft.PopupMenuItem(text="Livros Cadastrados", on_click=abrir_lista_livros),
-                            ft.PopupMenuItem(text="Funcionários", on_click=menu_clicked),
                         ]
                     ),
                     ft.PopupMenuButton(
                         content=ft.Text("Relatórios", weight=ft.FontWeight.BOLD),
                         items=[
                             ft.PopupMenuItem(text="Livros Emprestados", on_click=abrir_lista_emprestimos),
-                            ft.PopupMenuItem(text="Histórico de Alunos", on_click=menu_clicked),
                         ]
                     ),
                     ft.PopupMenuButton(
                         content=ft.Text("Sair", weight=ft.FontWeight.BOLD),
                         items=[
                             ft.PopupMenuItem(text="Fechar Aplicação", on_click=lambda e: fechar_app(e)),
-                            ft.PopupMenuItem(text="Sair do Sistema", on_click=menu_clicked),
                         ]
                     )
                 ],

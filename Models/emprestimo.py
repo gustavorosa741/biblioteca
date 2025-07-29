@@ -6,7 +6,7 @@ from Tables.funcionario import Funcionario
 from Tables.aluno import Aluno
 from sqlalchemy import String, cast, or_
 from sqlalchemy.orm import aliased
-
+from datetime import datetime
 
 
 def formatacao(e):
@@ -40,7 +40,7 @@ class CadastroEmprestimo:
 
         self.data_emprestimo = ft.TextField(
             label="Data de Empréstimo",
-            hint_text="Digite a data de empréstimo (DD/MM/AAAA)",
+            hint_text="Digite a data de empréstimo (AAAA/MM/DD)",
             prefix_icon=ft.Icons.DATE_RANGE,
             border_radius=10,
             filled=True,
@@ -133,11 +133,12 @@ class CadastroEmprestimo:
             return
 
         else:
+            data_convertida = data_emprestimo = datetime.strptime(data_emprestimo, '%Y-%m-%d').date()
             consulta_livro = session.query(Livro).filter_by(etiqueta=etiqueta).first()
             novo_emprestimo = Emprestimo(
                 aluno_id=consulta_aluno.id,
                 livro_id=consulta_livro.id,
-                data_emprestimo=data_emprestimo,
+                data_emprestimo=data_convertida,
                 responsavel=consulta_funcionario.id,
                 status=status
             )
@@ -304,7 +305,8 @@ class CadastroDevolucao:
             self.status_texto.update()
             return
         else:
-            emprestimo.data_devolucao = data_devolucao
+            data_convertida = data_devolucao = datetime.strptime(data_devolucao, '%Y-%m-%d').date()
+            emprestimo.data_devolucao = data_convertida
             emprestimo.responsavel_devolucao = consulta_funcionario.id
             emprestimo.status = status
             consulta_livro.disponivel = status_livro

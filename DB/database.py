@@ -9,7 +9,9 @@ load_dotenv()
 usuario = os.getenv("USUARIO")
 senha = os.getenv("SENHA")
 
-engine = create_engine(f"mysql+pymysql://{usuario}:{senha}@localhost:3306/biblioteca")
+#engine = create_engine(f"mysql+pymysql://{usuario}:{senha}@localhost:3306/biblioteca")
+
+engine = create_engine(f"sqlite:///{Path(__file__).parent}/biblioteca.db")
 
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
